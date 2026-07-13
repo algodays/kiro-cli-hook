@@ -1,0 +1,13 @@
+{
+  "name": "kiro-plan-mode-demo-app",
+  "version": "1.0.0",
+  "description": "Minimal Node/Express todo app to demonstrate the Kiro Plan-Mode hook pack.",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "test": "node --test src/test.test.js"
+  },
+  "keywords": ["kiro", "hooks", "plan-mode", "demo"],
+  "license": "MIT"
+}

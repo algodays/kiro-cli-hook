@@ -1,0 +1,16 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "skill-auto-loader",
+      "description": "Skill auto-loader for Kiro agents. On session start, detects the project type (Node, Python, Flutter, Rust, Go) from marker files and injects the matching skill markdown into the agent context via stdout.",
+      "trigger": "SessionStart",
+      "action": {
+        "type": "command",
+        "command": "bash .kiro/hooks/scripts/skill-loader.sh"
+      },
+      "timeout": 10,
+      "enabled": true
+    }
+  ]
+}

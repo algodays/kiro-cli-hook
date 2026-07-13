@@ -1,0 +1,17 @@
+# Runtime plan artifacts (created by hooks at session time)
+.kiro/plan/APPROVED
+.kiro/plan/PLAN.md
+.kiro/plan/TODO.md
+
+# Dependencies
+demo-app/node_modules/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor files
+*.swp
+*.swo
+*~
+demo/video/*.webm

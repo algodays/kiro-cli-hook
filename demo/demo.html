@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1280, initial-scale=1.0">
+<title>kiro-plan-mode demo</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'SF Mono', 'Fira Code', Consolas, monospace; background: #0d1117; color: #e6edf3; width: 1280px; height: 720px; overflow: hidden; }
+.slide { position: absolute; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.5s; padding: 40px; }
+.slide.active { opacity: 1; }
+h1 { font-size: 52px; margin-bottom: 16px; color: #58a6ff; font-weight: 700; }
+h2 { font-size: 34px; margin-bottom: 24px; color: #7ee787; font-weight: 600; }
+.subtitle { font-size: 22px; color: #8b949e; margin-bottom: 30px; text-align: center; max-width: 820px; line-height: 1.5; }
+.terminal { background: #161b22; border: 1px solid #30363d; border-radius: 8px; width: 920px; padding: 26px; font-size: 18px; line-height: 1.9; box-shadow: 0 8px 24px rgba(0,0,0,0.4); }
+.prompt { color: #58a6ff; }
+.cmd { color: #e6edf3; }
+.output { color: #8b949e; }
+.blocked { color: #f85149; font-weight: bold; }
+.approved { color: #7ee787; font-weight: bold; }
+.tag { display: inline-block; background: #1f6feb; color: white; padding: 5px 14px; border-radius: 12px; font-size: 15px; margin: 4px; }
+.hook-card { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 22px; margin: 10px; width: 270px; text-align: left; }
+.hook-card h3 { color: #58a6ff; font-size: 20px; margin-bottom: 10px; font-weight: 600; }
+.hook-card .trigger { color: #d2a8ff; font-size: 13px; margin-bottom: 8px; }
+.hook-card p { color: #8b949e; font-size: 14px; line-height: 1.5; }
+.hooks-grid { display: flex; flex-wrap: wrap; justify-content: center; }
+.step-num { display: inline-block; background: #58a6ff; color: #0d1117; width: 38px; height: 38px; border-radius: 50%; text-align: center; line-height: 38px; font-weight: bold; margin-right: 14px; flex-shrink: 0; }
+.step { font-size: 22px; margin: 14px 0; display: flex; align-items: center; }
+.step-text { color: #e6edf3; line-height: 1.4; }
+.problem-line { font-size: 20px; color: #e6edf3; margin: 10px 0; line-height: 1.6; max-width: 820px; }
+.problem-line .em { color: #f85149; }
+.problem-line .fix { color: #7ee787; }
+.repo-url { font-size: 20px; color: #58a6ff; margin-top: 30px; }
+</style>
+</head>
+<body>
+
+<!-- Slide 1: Title -->
+<div class="slide active" id="s1">
+  <h1>kiro-plan-mode</h1>
+  <p class="subtitle">A plan-first discipline layer for Kiro agents — built entirely with Kiro Hooks</p>
+  <div style="margin-top: 16px;">
+    <span class="tag">Kiro Birthday Week 2026</span>
+    <span class="tag">Day 1: Build a Hook</span>
+  </div>
+  <p class="repo-url">github.com/algodays/kiro-cli-hook</p>
+</div>
+
+<!-- Slide 2: The Problem -->
+<div class="slide" id="s2">
+  <h2>The problem I kept hitting</h2>
+  <p class="problem-line">Kiro's hooks are a great automation primitive.</p>
+  <p class="problem-line">But the agent would <span class="em">jump straight to editing files</span> the moment I asked for a feature —</p>
+  <p class="problem-line">sometimes before it had fully understood the codebase.</p>
+  <p class="problem-line" style="margin-top: 20px;">The diff was usually fine. The <span class="em">plan</span> behind it was implicit.</p>
+  <p class="problem-line" style="margin-top: 20px;">I wanted the agent to <span class="fix">think before it wrote code</span> — and I wanted to <span class="fix">approve that plan</span> first.</p>
+</div>
+
+<!-- Slide 3: The Idea -->
+<div class="slide" id="s3">
+  <h2>So I built it with hooks</h2>
+  <div style="margin-top: 10px;">
+    <div class="step"><span class="step-num">1</span><span class="step-text">Agent asked to build something → <span class="blocked">blocked by hook</span></span></div>
+    <div class="step"><span class="step-num">2</span><span class="step-text">Agent must explore the codebase & write a plan first</span></div>
+    <div class="step"><span class="step-num">3</span><span class="step-text">User reviews the plan, replies "approve plan"</span></div>
+    <div class="step"><span class="step-num">4</span><span class="step-text">Agent <span class="approved">executes</span> only after approval</span></div>
+  </div>
+  <p class="subtitle" style="margin-top: 30px; font-size: 18px;">No fork. No plugin. Just four JSON files in .kiro/hooks/.</p>
+</div>
+
+<!-- Slide 4: Four Hooks -->
+<div class="slide" id="s4">
+  <h2>Four hooks</h2>
+  <div class="hooks-grid">
+    <div class="hook-card">
+      <h3>plan-first-gate</h3>
+      <div class="trigger">UserPromptSubmit · shell</div>
+      <p>Blocks mutating prompts until a plan is written and approved. Read-only questions pass through.</p>
+    </div>
+    <div class="hook-card">
+      <h3>skill-auto-loader</h3>
+      <div class="trigger">SessionStart · shell</div>
+      <p>Detects project type from marker files and injects the matching skill markdown into context.</p>
+    </div>
+    <div class="hook-card">
+      <h3>todo-tracker</h3>
+      <div class="trigger">Stop · agent prompt</div>
+      <p>Updates .kiro/plan/TODO.md after every agent turn with completed and pending tasks.</p>
+    </div>
+    <div class="hook-card">
+      <h3>secret-guard</h3>
+      <div class="trigger">PreToolUse · agent prompt</div>
+      <p>Scans for API keys, tokens, private keys, and dangerous commands before any write.</p>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 5: Live Demo - Block -->
+<div class="slide" id="s5">
+  <h2>Live: a mutating prompt gets blocked</h2>
+  <div class="terminal">
+    <div><span class="prompt">$</span> <span class="cmd">kiro-cli chat "add a dark mode toggle to the demo app"</span></div>
+    <div style="margin-top: 14px;"></div>
+    <div class="output">> reading demo-app/public/index.html...</div>
+    <div class="output">> reading demo-app/src/server.js...</div>
+    <div class="output">> reading demo-app/package.json...</div>
+    <div style="margin-top: 12px;"></div>
+    <div class="blocked">PLAN MODE ACTIVE — request blocked</div>
+    <div class="output">the agent must not edit files yet.</div>
+    <div class="output">writing plan to .kiro/plan/PLAN.md...</div>
+    <div style="margin-top: 12px;"></div>
+    <div class="approved">plan written — status: awaiting approval</div>
+    <div class="output">reply "approve plan" to unlock execution.</div>
+  </div>
+</div>
+
+<!-- Slide 6: Live Demo - Approve & Execute -->
+<div class="slide" id="s6">
+  <h2>Live: approve, then execute</h2>
+  <div class="terminal">
+    <div><span class="prompt">$</span> <span class="cmd">kiro-cli chat "approve plan"</span></div>
+    <div style="margin-top: 10px;"></div>
+    <div class="approved">plan approved — execution mode unlocked.</div>
+    <div style="margin-top: 16px;"></div>
+    <div><span class="prompt">$</span> <span class="cmd">kiro-cli chat "implement the dark mode toggle now"</span></div>
+    <div style="margin-top: 10px;"></div>
+    <div class="output">> reading approved plan...</div>
+    <div class="output">> modifying demo-app/public/index.html...</div>
+    <div class="output">> +92 lines: CSS variables, dark theme, toggle button, localStorage</div>
+    <div style="margin-top: 12px;"></div>
+    <div class="approved">dark mode toggle implemented.</div>
+    <div class="output">source files modified only after explicit user approval.</div>
+  </div>
+</div>
+
+<!-- Slide 7: Closing -->
+<div class="slide" id="s7">
+  <h1 style="color: #7ee787;">plan first. then build.</h1>
+  <p class="subtitle" style="margin-top: 20px;">A plan-first discipline layer for Kiro agents — four hooks, no external tooling.</p>
+  <div style="margin-top: 30px;">
+    <span class="tag">#BuildWithKiro</span>
+    <span class="tag">#TeamKiro</span>
+    <span class="tag">@kirodotdev</span>
+  </div>
+  <p class="repo-url">github.com/algodays/kiro-cli-hook</p>
+</div>
+
+<script>
+const slides = ['s1','s2','s3','s4','s5','s6','s7'];
+function showSlide(i) {
+  document.querySelectorAll('.slide').forEach(s => s.classList.remove('active'));
+  document.getElementById(slides[i]).classList.add('active');
+}
+showSlide(0);
+const timings = [3000, 5500, 5000, 5500, 7000, 7000, 4000];
+let idx = 0;
+function next() {
+  idx++;
+  if (idx < slides.length) {
+    showSlide(idx);
+    setTimeout(next, timings[idx]);
+  } else {
+    showSlide(0);
+    idx = 0;
+    setTimeout(next, timings[0]);
+  }
+}
+setTimeout(next, timings[0]);
+</script>
+</body>
+</html>

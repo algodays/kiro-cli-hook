@@ -1,0 +1,15 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "todo-tracker",
+      "description": "Todo tracker for Kiro agents. After every agent turn (Stop), update .kiro/plan/TODO.md with completed and pending tasks so progress is always visible.",
+      "trigger": "Stop",
+      "action": {
+        "type": "agent",
+        "prompt": "Review the work completed in this turn. Update the file .kiro/plan/TODO.md with two sections: '## Completed' and '## Pending'. Move any tasks that were finished this turn into Completed (with a checkmark). Add any new tasks you discovered into Pending. Keep entries as concise one-liners. If TODO.md already exists, read it first and update it incrementally instead of overwriting. Do not modify any other files."
+      },
+      "enabled": true
+    }
+  ]
+}

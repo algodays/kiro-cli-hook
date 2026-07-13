@@ -1,0 +1,16 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "plan-first-gate",
+      "description": "Plan-first gate for Kiro agents. Blocks mutating prompts until the agent writes a plan to .kiro/plan/PLAN.md and the user replies 'approve plan'. Read-only questions are allowed through. Enforced via UserPromptSubmit + exit code 2.",
+      "trigger": "UserPromptSubmit",
+      "action": {
+        "type": "command",
+        "command": "bash .kiro/hooks/scripts/plan-first.sh"
+      },
+      "timeout": 10,
+      "enabled": true
+    }
+  ]
+}

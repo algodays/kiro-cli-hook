@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kiro Plan-Mode Demo</title>
+  <style>
+    :root {
+      --bg-color: white;
+      --text-color: black;
+      --heading-color: #4A90D9;
+      --border-color: #eee;
+      --button-bg: #4A90D9;
+      --button-delete-bg: #e74c3c;
+      --input-border: #ccc;
+      --completed-text: #999;
+    }
+    
+    [data-theme="dark"] {
+      --bg-color: #1e1e1e;
+      --text-color: #e0e0e0;
+      --heading-color: #5DA8E8;
+      --border-color: #3a3a3a;
+      --button-bg: #5DA8E8;
+      --button-delete-bg: #c0392b;
+      --input-border: #555;
+      --completed-text: #777;
+    }
+    
+    body { 
+      font-family: system-ui, sans-serif; 
+      max-width: 600px; 
+      margin: 40px auto; 
+      padding: 0 20px; 
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+    h1 { color: var(--heading-color); }
+    .header { display: flex; justify-content: space-between; align-items: center; }
+    .todo { 
+      display: flex; 
+      gap: 10px; 
+      align-items: center; 
+      padding: 8px; 
+      border-bottom: 1px solid var(--border-color); 
+    }
+    .todo.done span { text-decoration: line-through; color: var(--completed-text); }
+    button { 
+      cursor: pointer; 
+      padding: 6px 14px; 
+      border: none; 
+      border-radius: 4px; 
+      background: var(--button-bg); 
+      color: white; 
+    }
+    button.delete { background: var(--button-delete-bg); }
+    button.theme-toggle {
+      padding: 4px 10px;
+      font-size: 14px;
+      background: var(--border-color);
+      color: var(--text-color);
+    }
+    input { 
+      padding: 8px; 
+      border: 1px solid var(--input-border); 
+      border-radius: 4px;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>Kiro Plan-Mode Demo App</h1>
+    <button class="theme-toggle" onclick="toggleTheme()" id="theme-btn">🌙 Dark</button>
+  </div>
+  <p>This app was built using the Plan-First Gate hook. The agent planned first, got approval, then built this.</p>
+  <div>
+    <input id="title" placeholder="New todo..." />
+    <button onclick="addTodo()">Add</button>
+  </div>
+  <div id="list"></div>
+
+  <script>
+    // Theme management
+    function loadTheme() {
+      const theme = localStorage.getItem('theme') || 'light';
+      document.documentElement.dataset.theme = theme;
+      updateThemeButton();
+    }
+    
+    function toggleTheme() {
+      const currentTheme = document.documentElement.dataset.theme || 'light';
+      const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+      document.documentElement.dataset.theme = newTheme;
+      localStorage.setItem('theme', newTheme);
+      updateThemeButton();
+    }
+    
+    function updateThemeButton() {
+      const theme = document.documentElement.dataset.theme || 'light';
+      const btn = document.getElementById('theme-btn');
+      btn.textContent = theme === 'light' ? '🌙 Dark' : '☀️ Light';
+    }
+    
+    // Load theme immediately
+    loadTheme();
+    
+    // Todo CRUD operations
+    async function load() {
+      const res = await fetch('/api/todos');
+      const data = await res.json();
+      const list = document.getElementById('list');
+      list.innerHTML = '';
+      data.todos.forEach(t => {
+        const div = document.createElement('div');
+        div.className = 'todo' + (t.done ? ' done' : '');
+        div.innerHTML = `<span>${t.title}</span><button onclick="toggle(${t.id})">toggle</button><button class="delete" onclick="del(${t.id})">delete</button>`;
+        list.appendChild(div);
+      });
+    }
+    async function addTodo() {
+      const title = document.getElementById('title').value.trim();
+      if (!title) return;
+      await fetch('/api/todos', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ title }) });
+      document.getElementById('title').value = '';
+      load();
+    }
+    async function toggle(id) {
+      const res = await fetch('/api/todos/' + id, { method: 'PATCH', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ done: true }) });
+      load();
+    }
+    async function del(id) {
+      await fetch('/api/todos/' + id, { method: 'DELETE' });
+      load();
+    }
+    load();
+  </script>
+</body>
+</html>
